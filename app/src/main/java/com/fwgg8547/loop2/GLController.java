@@ -200,7 +200,7 @@ BatModel.DirectionDetectListener
                 right = true;
             } else if (counter.y > mBatt.getAngleCenter().y && counter.x == mBatt.getAngleCenter().x) {
                 above = true;
-            } else if (counter.y < mBatt.getAngleCenter().y && counter.x == mBatt.getAngleCenter().x)) {
+            } else if (counter.y < mBatt.getAngleCenter().y && counter.x == mBatt.getAngleCenter().x) {
                 below = true;
             }
         }
