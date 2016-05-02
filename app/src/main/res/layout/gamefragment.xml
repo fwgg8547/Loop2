@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
+
+	<RelativeLayout
+		android:id="@+id/gamelayout"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:orientation="vertical">
+
+	</RelativeLayout>
+
+	<RelativeLayout
+		android:id="@+id/resultlayout"
+		android:layout_width="fill_parent"
+		android:layout_height="fill_parent"
+		android:visibility="gone">
+
+		<TextView
+			android:layout_height="wrap_content"
+			android:textAppearance="?android:attr/textAppearanceLarge"
+			android:layout_width="wrap_content"
+			android:text="Large Text"
+			android:layout_centerHorizontal="true"
+			android:layout_centerVertical="true"
+			android:id="@+id/gamefragmentTextView1"/>
+
+		<Button
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:text="Retry"
+			android:layout_centerHorizontal="true"
+			android:layout_below="@id/gamefragmentTextView1"
+			android:id="@+id/gamefragmentRetryBtn"/>
+
+	</RelativeLayout>
+
+</FrameLayout>
+

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
+
+	<Button
+		android:layout_height="wrap_content"
+		android:layout_width="match_parent"
+		android:text="Start"
+		android:id="@+id/btn_menu_start"
+		android:layout_centerHorizontal="true"
+		android:layout_centerVertical="true"/>
+
+	<Button
+		android:layout_height="wrap_content"
+		android:layout_width="match_parent"
+		android:text="Exit"
+		android:id="@+id/btn_menu_exit"
+		android:layout_below="@id/btn_menu_start"/>
+
+</RelativeLayout>
+
