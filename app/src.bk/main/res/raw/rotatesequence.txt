@@ -1,0 +1,12 @@
+{
+	"Comment" : "rotate sequence",
+	"Comment" : "frame(int) dpf(float)",
+	"Sequence" : [
+		[
+			[120, 6.0,    0]
+		],
+		[
+			[60, 0.0,    0]
+		]
+	]
+}
