@@ -176,64 +176,46 @@ BatModel.DirectionDetectListener
 	public void notifyDirect(ScrollManager.Direct d)
 	{
 		boolean move = false;
-        boolean above = false, below = false, left = false, right = false;
 
 		if(d != mAutoDirect){
 			return;
 		}
-
-        PointF center = mBatt.getAngleCenter();
-        RectF rect = new RectF(center.x - BatModel.WIDTH*2, center.y-BatModel.WIDTH*2, center.x+BatModel.WIDTH*2, center.y+BatModel.WIDTH*2);
-        List<CollidableItem> cl = mCollisitionManager.getCollisionItem(rect);
-
-        Lg.i(TAG, "collision rect left= " + rect.left + " top "+ rect.top + " right " + rect.right + " bottom " + rect.bottom);
-        Iterator<CollidableItem> ite = cl.iterator();
-        Lg.i(TAG, "BatModel x=" + mBatt.getAngleCenter().x + "|y="+mBatt.getAngleCenter().y);
-        while(ite.hasNext()){
-            CollidableItem item = ite.next();
-            PointF counter = item.getPosition();
-            Lg.i(TAG, "collision item " + counter.x +" | "+ counter.y);
-
-            if(counter.x < mBatt.getAngleCenter().x && counter.y == mBatt.getAngleCenter().y) {
-                left = true;
-            } else if (counter.x > mBatt.getAngleCenter().x && counter.y == mBatt.getAngleCenter().y) {
-                right = true;
-            } else if (counter.y > mBatt.getAngleCenter().y && counter.x == mBatt.getAngleCenter().x) {
-                above = true;
-            } else if (counter.y < mBatt.getAngleCenter().y && counter.x == mBatt.getAngleCenter().x) {
-                below = true;
-            }
-        }
-
-
-        if(d == ScrollManager.Direct.UP && above){
-            move = true;
-        }
-
-        if(d == ScrollManager.Direct.RIGHT && right){
-            move = true;
-        }
-
-        if(d == ScrollManager.Direct.LEFT && left){
-            move = true;
-        }
-
-		/*
-		if(d == ScrollManager.Direct.UP &&
-		mBlockGenerater.isBlockAboveBatt()){
-			move = true;
-		}
 		
-		if(d == ScrollManager.Direct.RIGHT &&
-			 mBlockGenerater.isBlockRightBatt()){
-			move = true;
-		}
 		
-		if(d == ScrollManager.Direct.LEFT &&
-			 mBlockGenerater.isBlockLeftBatt()){
-			move = true;
-		}
-		*/
+		PointF center = mBatt.getItemArray().get(0).getPosition();
+    RectF rect = new RectF(center.x - BatModel.WIDTH*2, center.y-BatModel.WIDTH*2, center.x+BatModel.WIDTH*2, center.y+BatModel.WIDTH*2);
+    List<CollidableItem> cl = mCollisitionManager.getCollisionItem(rect);
+		Iterator<CollidableItem> ite = cl.iterator();
+		
+		Lg.w(TAG, "auto move " +d);
+    Lg.d(TAG, "BatModel angle center x=" + mBatt.getAngleCenter().x + "|y="+mBatt.getAngleCenter().y);
+		Lg.i(TAG, "BatModel position x=" + mBatt.getItemArray().get(0).getPosition().x + "|y="+mBatt.getItemArray().get(0).getPosition().y);
+		Lg.i(TAG, "collision test rect left= " + rect.left + " top "+ rect.top + " right " + rect.right + " bottom " + rect.bottom);
+		Lg.i(TAG, "detected block size is " + cl.size());
+		
+    while(ite.hasNext()){
+			CollidableItem item = ite.next();
+			PointF counter = item.getPosition();
+			Lg.i(TAG, "collision item " + counter.x +" | "+ counter.y);
+			
+      if(d == ScrollManager.Direct.LEFT && counter.x < center.x && counter.y == center.y) {
+				move = true;
+				break;
+			} 
+			if(d == ScrollManager.Direct.RIGHT && counter.x > center.x && counter.y == center.y) {
+				move = true;
+				break;
+			}
+			if(d == ScrollManager.Direct.UP && counter.y > center.y && counter.x == center.x) {
+				move = true;
+				break;
+			}
+			if(d == ScrollManager.Direct.DOWN && counter.y < center.y && counter.x == center.x) {
+				move = true;
+				break;
+			}
+    }
+		
 		if(move){
 			mBatt.updatePosition(d);
 			scroll(d);
@@ -261,30 +243,29 @@ BatModel.DirectionDetectListener
 		
 		switch(d){
 			case UP:
-				mBlockGenerater.shiftDown();
 				if(GameConfig.BLOCKSCROLL != 0) {
 					doScroll(ScrollSequenceItem.UP);					
 				}
 				break;
 				
 			case DOWN:
-				mBlockGenerater.shiftUp();
 				if(GameConfig.BLOCKSCROLL != 0){
 					doScroll(ScrollSequenceItem.DOWN);
 				}
 				break;
+				
 			case LEFT:
-				mBlockGenerater.shiftleft();
 				if(GameConfig.HORIZSCROLL != 0){
 					doScroll(ScrollSequenceItem.LEFT);
 				}
 				break;
+				
 			case RIGHT:
-				mBlockGenerater.shiftRight();
 				if(GameConfig.HORIZSCROLL != 0){
 					doScroll(ScrollSequenceItem.RIGHT);
 				}
 				break;
+				
 			case NONE:
 				doScroll(ScrollSequenceItem.NONE);
 				break;
@@ -319,8 +300,6 @@ BatModel.DirectionDetectListener
 			ItemBase i =  mBatt.createItem(0);
 			i.setType(GLEngine.BATTMODELINDX);
 			mBlockGenerater.createInitialItem();
-			mBlockGenerater.setBattPosition(3+BlockMap.MAPOFFSETW,4); //todo
-			//mBlockGenerater.setAutoMode(false);
 			CollidableItem.setOffsetVect(new Vec2(0, GameConfig.SCROLLVELOCITY));
 			mIsFirstUpdate = false;
 			mIsReady = true;

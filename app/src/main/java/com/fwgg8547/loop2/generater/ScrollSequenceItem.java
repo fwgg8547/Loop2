@@ -6,8 +6,12 @@ import com.fwgg8547.loop2.*;
 
 public class ScrollSequenceItem extends SequenceItemBase
 {
+	public static final int FRAME = 12;
+	public static final int PPF = 15;
+	public static final int DIST = FRAME*PPF;
+	
 	public static final ScrollSequenceItem UP = new ScrollSequenceItem(
-		ScrollManager.Direct.UP, 12, 15, new Vec2(0,-1)
+		ScrollManager.Direct.UP, FRAME, PPF, new Vec2(0,-1)
 	);
 	public static final ScrollSequenceItem DOWN = new ScrollSequenceItem(
 		ScrollManager.Direct.DOWN, 12, 15, new Vec2(0, 1)

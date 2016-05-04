@@ -72,9 +72,6 @@ public class BlockModel extends CollisionModel
 		mIsScrollable = true;
 		mMoveChecker = new MoveChecker();
 		mScreenInfo = ScreenModel.getInstance().getScreenInfo();
-		
-		
-		
 	}
 
 	@Override
@@ -95,9 +92,6 @@ public class BlockModel extends CollisionModel
 				if(itm.getPosition().y < DELETEMERGIN) {
 					itm.mIsDeleted = true;
 				}
-				
-				
-				
 				
 				// animation check
 				if(!itm.mIsDeleted) {

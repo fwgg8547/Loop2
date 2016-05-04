@@ -14,6 +14,10 @@ public class BlockMap
 	public static final int MAPWIDTH=MAPINITIALW + MAPOFFSETW*2;
 	private Generater mGenerater;
 	private BlockItem[] mBlockItems;
+	private BlockItem[] mTopItems;
+	private BlockItem[] mBottomItems;
+	private BlockItem[] mRightItems;
+	private BlockItem[] mLeftItems;
 	private int mBattItemPosition;
 	private float mBattRDirect;
 	private int mBottomLine;
@@ -51,11 +55,22 @@ public class BlockMap
 		for(int i=0; i<mBlockItems.length; i++){
 			mBlockItems[i]=null;
 		}
+		
+		mTopItems = new BlockItem[MAPINITIALW];
+		for(int i=0; i<mTopItems.length; i++){
+			mTopItems[i]=null;
+		}
+		
+		
 		mRand = new Random();
 	}
 	
 	public void clear(){
 		mBlockItems = null;
+		mTopItems = null;
+		mBottomItems = null;
+		mRightItems = null;
+		mLeftItems = null;
 		mGenerater = null;
 		mBottomLine = 0;
 		mTopLine = 0;
@@ -339,150 +354,6 @@ public class BlockMap
 		return deleted;
 	}
 	
-	synchronized public void addBlockAtTopByRand(){
-		int b = getBlockNumOfLine(mTopLine);
-		int index = 0;
-		if(b > 0 && mTopLine < MAPHEIGHT-1){
-			if(b==1){
-				index =0;
-			} else{
-				index = mRand.nextInt(b);
-				Lg.i(TAG, "rand " +index +"| "+b);
-			}
-			BlockItem[] top = getLine(mTopLine);
-			int found = 0;
-			for(int i=0; i<MAPWIDTH; i++){
-				if(top[i] != null){
-					if(found == index){
-						Lg.i(TAG, "add " +(mTopLine+1)+"|"+i);
-						addMap(getIndex(mTopLine+1, i));
-						if(i>0){
-							Lg.i(TAG, "addmap -1 " + (i-1));
-							addMap(getIndex(mTopLine+1, i-1));
-						}
-						if(i<MAPWIDTH-1){
-							Lg.i(TAG, "addmap +1 " + (i+1));
-							addMap(getIndex(mTopLine+1, i+1));
-						}
-						updateTopAndBottom(mTopLine+1);
-						break;
-					}
-					found++;
-				}
-			}
-		} else {
-			Lg.i(TAG, "add fail " +b +"|"+mTopLine);
-			return;
-		}
-		
-	}
-	
-	synchronized public void addBlockAtTopByZigZag(){
-		//  *   // *    //  **
-		// **   // **   //  *
-		// * 　 //  *   // **
-		if(mTopLine >= MAPHEIGHT-1){
-			Lg.i(TAG, "top line is max");
-			return;
-		}
-		Lg.i(TAG, "current top="+mTopLine+"| batt="+getLineIndex( mBattItemPosition));
-		 // 0 is left
-		
-		if(mBlockCreateStage == 0){
-			
-			mBlockCreateDirection = (mRand.nextInt(2) == 0)? Direction.Left: Direction.Right;
-			int index = blockEdgeOfLine(mTopLine, mBlockCreateDirection);
-			if(addMap2(getOneLineAbove(index)) == null){
-				Lg.i(TAG, "fail create ");
-			} else {
-				mBlockCreateStage++;
-				Lg.i(TAG,"stage 0 " +getOneLineAbove(index) );
-				Lg.i(TAG,"direction = "+mBlockCreateDirection);
-			}
-			
-		} else if (mBlockCreateStage == 1){
-			int index = blockEdgeOfLine(mTopLine, mBlockCreateDirection);
-			int a = getOneLineAbove(index);
-			int length = mRand.nextInt(MAPWIDTH-2) + 2;
-			Lg.i(TAG, "create len ="+length);
-			boolean canGoNext = true;
-			for(int i=0; i<length; i++){
-				if(mBlockCreateDirection == Direction.Right){
-					if(a+i <= getLineEndIndex(mTopLine+1)){
-						if(addMap2(a+i) == null){
-							Lg.i(TAG, "fail create");
-							if(i==0){
-								canGoNext = false;
-							}
-						}
-						Lg.i(TAG,"stage1 " + (a+i));
-					} else {
-						break;
-					}
-				} else{
-					if(a-i >= getLine1stIndex( mTopLine+1)){
-						if(addMap2(a-i) == null){
-							Lg.i(TAG, "fail create");
-							if(i==0){
-								canGoNext = false;
-							}
-						}
-						Lg.i(TAG,"stage1 " + (a-i));
-					} else {
-						break;
-					}
-				}
-			}
-			
-			if(canGoNext) {
-				mBlockCreateStage++;
-			}
-		} else {
-			if(mBlockCreateDirection == Direction.Left){
-				mBlockCreateDirection = Direction.Right;
-			}
-			int a = blockEdgeOfLine(mTopLine, mBlockCreateDirection);
-			if(addMap2(getOneLineAbove(a)) == null){
-				Lg.i(TAG, "fail create");
-			}else {
-				mBlockCreateStage=0;
-				Lg.i(TAG,"stage2 " + getOneLineAbove(a));
-			}
-		}
-		updateTopAndBottom(mTopLine+1);
-		
-		
-	}
-	
-	synchronized public void addBlockAtTopByZigZag2(){
-		//  *   // *    //  **
-		// **   // **   //  *
-		// * 　 //  *   // **
-		if(mTopLine >= MAPHEIGHT-1){
-			Lg.i(TAG, "top line is max");
-			return;
-		}
-		Lg.i(TAG, "current top="+mTopLine+"| batt="+getLineIndex( mBattItemPosition));
-		Direction edge = (mRand.nextInt(2) == 0)? Direction.Left:Direction.Right;
-		int index = blockEdgeOfLine(mTopLine, edge);
-
-		addMap2(getOneLineAbove(index));
-		if(edge==Direction.Left){
-			//left
-			if(index == getLine1stIndex(mTopLine)){
-
-			} else {
-				addMap2(getOneLineAbove(index-1));
-			}
-		} else {
-			if(index == getLineEndIndex(mTopLine)){
-
-			} else {
-				addMap2(getOneLineAbove(index+1));
-			}
-		}
-		updateTopAndBottom(mTopLine+1);
-	}
 	
 	public int blockEdgeOfTopLine(Direction rightLeft){
 		return blockEdgeOfLine(mTopLine, rightLeft);
