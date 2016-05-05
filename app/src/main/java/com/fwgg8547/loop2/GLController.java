@@ -34,7 +34,7 @@ BatModel.DirectionDetectListener
 {
 	private final static String TAG = GLController.class.getSimpleName();
 	
-	private final static int HITRANGE = 22;
+	
 	private BlockModel mBlock;
 	private BlockGenerater mBlockGenerater;
 	private BatModel mBatt;
@@ -89,9 +89,9 @@ BatModel.DirectionDetectListener
 		if(r<0){
 			r += 360;
 			r %= 360;
-			Lg.d(TAG,"Current angle = " + r);
 		}
 		
+		Lg.w(TAG,"onDown angle = " + r);
 		ScrollManager.Direct d = getHitDirect(r);
 		Lg.i(TAG, "Hit DIRECT = " + d);
 		if(d == ScrollManager.Direct.NONE){
@@ -117,13 +117,13 @@ BatModel.DirectionDetectListener
 	}
 	
 	private ScrollManager.Direct getHitDirect(float r){
-		if(r >= 90-HITRANGE && r < 90+HITRANGE){
+		if(r >= 90-GameConfig.HITRANGE && r < 90+GameConfig.HITRANGE){
 			return ScrollManager.Direct.UP;
-		} else if(r >= 180-HITRANGE && r < 180+HITRANGE){
+		} else if(r >= 180-GameConfig.HITRANGE && r < 180+GameConfig.HITRANGE){
 			return ScrollManager.Direct.LEFT;
-		} else if(r >= 270-HITRANGE && r < 270+HITRANGE){
+		} else if(r >= 270-GameConfig.HITRANGE && r < 270+GameConfig.HITRANGE){
 			return ScrollManager.Direct.DOWN;
-		} else if((r >= 0 && r < HITRANGE) || (r > 360-HITRANGE)){
+		} else if((r >= 0 && r < GameConfig.HITRANGE) || (r > 360-GameConfig.HITRANGE)){
 			return ScrollManager.Direct.RIGHT;
 		} else {
 			return ScrollManager.Direct.NONE;
@@ -177,7 +177,7 @@ BatModel.DirectionDetectListener
 	{
 		boolean move = false;
 
-		if(d != mAutoDirect){
+		if(d != mAutoDirect || mBatt.isDeleting()){
 			return;
 		}
 		
@@ -198,19 +198,31 @@ BatModel.DirectionDetectListener
 			PointF counter = item.getPosition();
 			Lg.i(TAG, "collision item " + counter.x +" | "+ counter.y);
 			
-      if(d == ScrollManager.Direct.LEFT && counter.x < center.x && counter.y == center.y) {
+      if(d == ScrollManager.Direct.LEFT && 
+			counter.x < center.x && 
+			(counter.y < center.y + BlockModel.WIDTH &&
+			counter.y > center.y - BlockModel.WIDTH)) {
 				move = true;
 				break;
 			} 
-			if(d == ScrollManager.Direct.RIGHT && counter.x > center.x && counter.y == center.y) {
+			if(d == ScrollManager.Direct.RIGHT && 
+			counter.x > center.x && 
+			(counter.y < center.y + BlockModel.WIDTH &&
+			counter.y > center.y - BlockModel.WIDTH)) {
 				move = true;
 				break;
 			}
-			if(d == ScrollManager.Direct.UP && counter.y > center.y && counter.x == center.x) {
+			if(d == ScrollManager.Direct.UP && 
+			counter.y > center.y && 
+			(counter.x < center.x + BlockModel.WIDTH &&
+			counter.x > center.x - BlockModel.WIDTH)) {
 				move = true;
 				break;
 			}
-			if(d == ScrollManager.Direct.DOWN && counter.y < center.y && counter.x == center.x) {
+			if(d == ScrollManager.Direct.DOWN && 
+			counter.y < center.y && 
+			(counter.x < center.x + BlockModel.WIDTH &&
+			counter.x > center.x - BlockModel.WIDTH)){
 				move = true;
 				break;
 			}

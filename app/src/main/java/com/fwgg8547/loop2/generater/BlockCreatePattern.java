@@ -49,7 +49,7 @@ public class BlockCreatePattern
 		}
 		
 		// create block num
-		int count = mRand.nextInt(BlockMap.MAPINITIALW-1);
+		int count = mRand.nextInt(2)+1;
 		int created = 0;
 		for(int i=0; i<BlockMap.MAPINITIALW;i++){
 			if( mRand.nextBoolean() && before[i] != null){
