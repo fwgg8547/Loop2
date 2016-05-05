@@ -23,11 +23,6 @@ public class BatModel extends CollisionModel
 {
 	private static final String TAG = BatModel.class.getSimpleName();
 	private static final int OBJ_NUM = 1;
-	public static final float RVELOCITY = 6;
-	public static final float CENTEROFFSET = 85;
-	public static final float WIDTH = 90;
-	public static final float DIFF = WIDTH-CENTEROFFSET;
-	private static final float HITRANGE = 5;
 	private int mIdOffset;
 	private int mIdCurr;
 	private int mTextureId;
@@ -60,7 +55,12 @@ public class BatModel extends CollisionModel
 					i--; // mblock was reduced
 					new InnerEvent().notifyEvent(InnerEvent.InnerMessage.Event.GameOver);
 				}
+				
+				if(itm.getPosition().y < GameConfig.DELETEMERGIN) {
+					itm.mIsDeleted = true;
+				}
 			}
+	
 			for(int i=0,n=mItemList.size();i<n;i++){
 				CollidableItem itm = (CollidableItem)mItemList.get(i);
 				itm.moveAnimation();
@@ -143,7 +143,7 @@ public class BatModel extends CollisionModel
 		for(int i=0,n=mItemList.size();i<n;i++){
 			CollidableItem itm = (CollidableItem)mItemList.get(i);
 			itm.setRotatePattern(new RotateSequence[]{
-				new RotateSequence(60, RVELOCITY*mClockWise)
+				new RotateSequence(60, GameConfig.RVELOCITY*mClockWise)
 			}, null);
 			Lg.i(TAG,"angle deelta "+a*mClockWise);
 		}
@@ -207,13 +207,13 @@ public class BatModel extends CollisionModel
 	}
 	
 	private ScrollManager.Direct getHitDirect(float r){
-		if(r >= 90-HITRANGE && r < 90+HITRANGE){
+		if(r >= 90-GameConfig.AUTOHITRANGE && r < 90+GameConfig.AUTOHITRANGE){
 			return ScrollManager.Direct.UP;
-		} else if(r >= 180-HITRANGE && r < 180+HITRANGE){
+		} else if(r >= 180-GameConfig.AUTOHITRANGE && r < 180+GameConfig.AUTOHITRANGE){
 			return ScrollManager.Direct.LEFT;
-		} else if(r >= 270-HITRANGE && r < 270+HITRANGE){
+		} else if(r >= 270-GameConfig.AUTOHITRANGE && r < 270+GameConfig.AUTOHITRANGE){
 			return ScrollManager.Direct.DOWN;
-		} else if((r >= 0 && r < HITRANGE) || (r > 360-HITRANGE)){
+		} else if((r >= 0 && r < GameConfig.AUTOHITRANGE) || (r > 360-GameConfig.AUTOHITRANGE)){
 			return ScrollManager.Direct.RIGHT;
 		} else {
 			return ScrollManager.Direct.NONE;
@@ -226,8 +226,8 @@ public class BatModel extends CollisionModel
 			mLock.writeLock();
 			int clockwise = getAngleTggle();
 			setAngleTggle();
-			setAngleDelta(BatModel.RVELOCITY);
-			setCenterOffset(new Vec2(0,BatModel.CENTEROFFSET));
+			setAngleDelta(GameConfig.RVELOCITY);
+			setCenterOffset(new Vec2(0,GameConfig.CENTEROFFSET));
 		
 			for(int i=0,n=mItemList.size();i<n;i++){
 				CollidableItem itm = (CollidableItem)mItemList.get(i);
@@ -238,29 +238,29 @@ public class BatModel extends CollisionModel
 					case UP:
 						Lg.d(TAG, "UP");
 						if(clockwise > 0){
-							p.y-=DIFF;
+							p.y-=GameConfig.DIFF;
 							p.rotateDeg(180);
 						} else {
-							p.y+=DIFF;
+							p.y+=GameConfig.DIFF;
 						}
 						break;
 					case DOWN:
 						Lg.d(TAG, "DOWN");
 						if(clockwise < 0){
-							p.y+=DIFF;
+							p.y+=GameConfig.DIFF;
 							p.rotateDeg(180);
 						} else{
-							p.y-=DIFF;
+							p.y-=GameConfig.DIFF;
 						}
 						break;
 						
 					case LEFT:
 						Lg.d(TAG, "LEFT");
 						if(clockwise > 0){
-							p.y-=DIFF;
+							p.y-=GameConfig.DIFF;
 							p.rotateDeg(270);
 						} else {
-							p.y+=DIFF;
+							p.y+=GameConfig.DIFF;
 							p.rotateDeg(90);
 						}
 						break;
@@ -268,10 +268,10 @@ public class BatModel extends CollisionModel
 					case RIGHT:
 						Lg.d(TAG, "RIGHT");
 						if(clockwise > 0){
-							p.y-=DIFF;
+							p.y-=GameConfig.DIFF;
 							p.rotateDeg(90);
 						} else{
-							p.y+=DIFF;
+							p.y+=GameConfig.DIFF;
 							p.rotateDeg(270);
 						}
 						break;
@@ -332,7 +332,7 @@ public class BatModel extends CollisionModel
 		if(p.mTexturePattern != null){
 			it.setTexturePattern(p.mTexturePattern, null);
 		}
-		it.setCenterOffset(new Vec2(0,CENTEROFFSET));
+			it.setCenterOffset(new Vec2(0,GameConfig.CENTEROFFSET));
 		it.setAngleCenter(it.getPosition());
 		it.setColor(new float[]{1,1,1,1});
 		it.moveAnimation();

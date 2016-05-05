@@ -6,51 +6,32 @@ import java.util.*;
 public class BlockCreatePattern
 {
 	private static final String TAG = BlockCreatePattern.class.getSimpleName();
-	private BlockMap mBlockMap;
 	private int mCreateStage;
 	private BlockMap.Direction mCreateDirection;
 	private Random mRand;
 	
-	private class MapStatus{
-		//public int mHeight;
-		//public int mWidth;
-		//public int mInitW;
-		int mTopLine;
-		int mBottomLine;
-		
-	}
+	public BlockCreatePattern(){}
 	
-	public BlockCreatePattern(){
-		
-	}
-	
-	public void initialize(BlockMap map){
-		mBlockMap = map;
+	public void initialize(){
 		mRand = new Random();
 	}
 	
 	public List<Integer> getNextCreatePosition(){
 		
-		MapStatus ms = new MapStatus();
-		//ms.mHeight = BlockMap.MAPHEIGHT;
-		//ms.mWidth = BlockMap.MAPWIDTH;
-		//ms.mInitW = BlockMap.MAPINITIALW;
-		ms.mTopLine = mBlockMap.getTopLine();
-		ms.mBottomLine = mBlockMap.getBottomLine();
-		
 		List<Integer> poslist = null;
 		if(mCreateStage == 0){
+			Lg.i(TAG, "Create Stage 0");
 			// add upper
-			int size = mRand.nextInt(2);
-			poslist = addBlockAtTop(ms, size);
+			poslist = addBlockAtTop();
 			if(poslist.size() > 0){
 				mCreateStage=1;
 			}
 		} else {
+			Lg.i(TAG, "Create Stage 1");
 			mCreateDirection = (mRand.nextInt(2) ==0)? BlockMap.Direction.Left:BlockMap.Direction.Right;
 			
 			// add horizontal
-			poslist = addBlockAtTopWidth(ms);
+			poslist = addBlockAtTopWidth();
 			if(poslist.size() > 0){
 				mCreateStage=0;
 			}
@@ -59,45 +40,36 @@ public class BlockCreatePattern
 		return poslist;
 	}
 	
-	private List<Integer> addBlockAtTop(MapStatus ms, int size){
+	private List<Integer> addBlockAtTop(){
 		List<Integer> poslist = new ArrayList<Integer>();
-		if(ms.mTopLine >= BlockMap.MAPHEIGHT-1){
-			Lg.i(TAG, "top line is max");
+		
+		BlockItem[] before = BlockMap2.INSTANCE.getTop();
+		if (before == null) {
 			return poslist;
 		}
-		Lg.i(TAG, "current top="+ms.mTopLine);
 		
-		int ml = mBlockMap.getTopLine1stIndex() + BlockMap.MAPOFFSETW-1;
-		int mr = ml+BlockMap.MAPINITIALW;
-		
-		int count = mRand.nextInt(BlockMap.MAPINITIALW-1);
-		for(int i=0; i<BlockMap.MAPWIDTH;i++){
-			int test = ml+count+i;
-			if(mBlockMap.isExist(test)){
-				poslist.add(mBlockMap.getOneLineAbove(test));
-				poslist.add(mBlockMap.getOneLineAbove(test+1));
-				
-				Lg.i(TAG,"stage 0 " +mBlockMap.getOneLineAbove(test) );
-				Lg.i(TAG,"added line  = "+mBlockMap.getLineIndex(test));
-				
+		// create block num
+		int count = mRand.nextInt(2)+1;
+		int created = 0;
+		for(int i=0; i<BlockMap.MAPINITIALW;i++){
+			if( mRand.nextBoolean() && before[i] != null){
+				poslist.add(i);
+				created++;
+			}
+			if( created >= count) {
 				break;
 			}
 		}
 		
+		Lg.i(TAG, "created block count is " + poslist.size());
 		return poslist;
 	}
 	
-	private List<Integer> addBlockAtTopWidth(MapStatus ms){
+	private List<Integer> addBlockAtTopWidth(){
 		List<Integer> poslist = new ArrayList<Integer>();
-		if(ms.mTopLine >= BlockMap.MAPHEIGHT-1){
-			Lg.i(TAG, "top line is max");
-			return poslist;
-		}
-		
-		int ml = mBlockMap.getLine1stIndex(ms.mTopLine+1)+BlockMap.MAPOFFSETW;
 		
 		for(int i=0; i<BlockMap.MAPINITIALW; i++){
-			poslist.add(ml+i);
+			poslist.add(i);
 		}
 		
 		return poslist;

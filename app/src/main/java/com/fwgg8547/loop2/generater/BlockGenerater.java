@@ -24,7 +24,7 @@ implements BlockMap.Generater
 	private boolean mIsReady=false;
 	private boolean mPending=false;
 	private BlockModel mBlockModel;
-	BlockMap mBlockMap;
+	BlockMap2 mBlockMap2;
 	BlockCreatePattern mCreatePattern;
 	List<BlockItem> mDeletedItem;
 	Random mRand;
@@ -33,10 +33,10 @@ implements BlockMap.Generater
 		super(m);
 		mBlockModel = m;
 		mDeletedItem = new ArrayList<BlockItem>();
-		mBlockMap = BlockMap.getInstance();
+		mBlockMap2 = BlockMap2.INSTANCE;
+		mBlockMap2.initialize();
 		mCreatePattern = new BlockCreatePattern();
-		mBlockMap.initialize(this);
-		mCreatePattern.initialize(mBlockMap);
+		mCreatePattern.initialize();
 		mSequenceEnd = false;
 		mPending = false;
 		mRand = new Random();
@@ -46,13 +46,10 @@ implements BlockMap.Generater
 	public void clear()
 	{
 		super.clear();
-		if(mBlockMap != null){
-			mBlockMap.clear();
-		}
-		mBlockMap=null;
 		if(mDeletedItem != null){
 			mDeletedItem.clear();
 		}
+		mBlockMap2=null;
 		mDeletedItem = null;
 		mBlockModel = null;
 		mIsReady = false;
@@ -74,47 +71,33 @@ implements BlockMap.Generater
 			return;
 		}
 		mCounter++;
-		if(mDeletedItem.size() > 0){
-			mBlockModel.deleteItem(mDeletedItem);
-			mDeletedItem.clear();
-			addNewLines();
-		}
-		
-		if(mPending){
-			if(mBlockModel.isMoving()){
-				Lg.d(TAG,"create pend");
-				mPending = true;
-			} else {
-				//addTopLine();
-				Lg.i(TAG, "create !");
-				addNewLines();
-				mPending = false;
-			}
-		}
 		
 		if(mCounter >= GENERATEPRIOD){
 			mCounter=0;
-			
-			if(GameConfig.BLOCKDELETE != 0 && mBlockModel.size() > 0){
-				deleteBottomLine();
-			}	
-			
-			
+			addNewLines();
 		}
+		
 	}
 	
 	private void createBoard(){
 		int indx=0;
-		for(int i=0; i<BlockMap.MAPHEIGHT; i++){
+		for(int i=0; i<BlockMap.MAPHEIGHT-1; i++){
 			indx+=BlockMap.MAPOFFSETW;
 			for(int j=0; j<BlockMap.MAPINITIALW; j++){
 				BlockItem itm = (BlockItem)mBlockModel.createItem(indx);
-				mBlockMap.addMap(indx, itm);
 				indx++;
 			}
 			indx+=BlockMap.MAPOFFSETW;
 		}
-		mBlockMap.refesh();
+		
+		// top line
+		BlockItem[] tmp = new BlockItem[BlockMap2.MAPINITIALW];
+		indx+=BlockMap.MAPOFFSETW;
+		for(int j=0; j<BlockMap2.MAPINITIALW; j++){
+			tmp[j] = (BlockItem)mBlockModel.createItem(indx);
+			indx++;
+		}
+		mBlockMap2.setTop(tmp);
 	}
 
 	@Override
@@ -135,108 +118,32 @@ implements BlockMap.Generater
 		return (BlockItem)mBlockModel.createItem(pattern, y);
 	}
 	
-	public boolean isBlockAboveBatt(){
-		return mBlockMap.isBlockAboveBatt();
-	}
-	
-	public boolean isBlockBelowBatt(){
-		return mBlockMap.isBlockBelowBatt();
-	}
-	
-	public boolean isBlockRightBatt(){
-		return mBlockMap.isBlockRightBatt();
-	}
-	
-	public boolean isBlockLeftBatt(){
-		return mBlockMap.isBlockLeftBatt();
-	}
-	
-	public void setBattPosition(int x, int y){
-		mBlockMap.setBattPosition(y, x);
-	}
-	
-	public void setBattRotateDirect(float r){
-		mBlockMap.setBattRotateDirect(r);
-	}
-	
-	public List<BlockItem> shiftDown(){
-		if(GameConfig.BLOCKSCROLL != 0){
-			mDeletedItem.addAll( mBlockMap.moveDown());
-			mPending = true;
-		} else{
-			mBlockMap.moveDown();
-		}
-		
-		return null;
-	}
-	
-	public List<BlockItem> shiftleft(){
-		if(GameConfig.HORIZSCROLL !=0){
-			mDeletedItem.addAll( mBlockMap.moveright());
-			mPending = true;
-		} else{
-			mBlockMap.battMoveLeft();
-		}
-		return null;
-	}
-	
-	public List<BlockItem> shiftRight(){
-		if(GameConfig.HORIZSCROLL != 0){
-			mDeletedItem.addAll( mBlockMap.moveleft());
-			mPending = true;
-		} else {
-			mBlockMap.battMoveRight();
-		}
-		return null;
-	}
-	
-	public List<BlockItem> shiftUp(){
-		// todo
-		return null;
-	}
-	
-	public void addTopLine(){
-		Lg.i(TAG, "add top line");
-		mBlockMap.addTopLine();
-	}
-
 	private void addNewLines(){
 		Lg.i(TAG, "add new lines current");
 	
 		List<Integer> poslist = mCreatePattern.getNextCreatePosition();
-		Lg.i(TAG,"new " + poslist.size());
+		Lg.i(TAG,"new line size is " + poslist.size());
 		
-		if(poslist != null && poslist.size() > 0){
+		// get current y position of block
+		PointF beforePos = null;
+		BlockItem[] tmp = mBlockMap2.getTop();
+		for (BlockItem bi : tmp){
+			if (bi != null) {
+				beforePos = bi.getPosition();
+				Lg.i(TAG, "current block Y position is " + beforePos.y);				break;
+			}
+		}
+		
+		// create new blocks
+		tmp = new BlockItem[BlockMap2.MAPINITIALW];
+		if(beforePos != null && poslist != null && poslist.size() > 0){
 			Iterator ite = poslist.iterator();
 			while(ite.hasNext()){
 				int pos = (Integer) ite.next();
-				int belowLine = mBlockMap.getLineIndex(pos) -1;
-				if (mBlockMap.getBlockNumOfLine(belowLine) >0){
-					for(int i=mBlockMap.getLine1stIndex(belowLine); i<mBlockMap.getLineEndIndex(belowLine); i++){
-						if(mBlockMap.isExist(i)){
-							PointF position = mBlockMap.getBlock(i).getPosition();
-							Lg.i(TAG,"addmap2 y position " +position.y+BatModel.WIDTH*2);
-							BlockItem b = getNextItem(pos, position.y+BatModel.WIDTH*2);
-							mBlockMap.addMap(pos, b);
-							break;
-						}
-					}
-				} else {
-					BlockItem b = getNextItem(pos);		
-					mBlockMap.addMap(pos,b);
-				}
+				BlockItem b = getNextItem(pos, beforePos.y+BatModel.WIDTH*2);
+				tmp[pos] = b;
 			}
-			mBlockMap.refesh();
-		}
-	}
-	
-	
-	private void deleteBottomLine(){
-		List<BlockItem> deleted = mBlockMap.deleteBottomLine();
-		if(deleted.size() >0){
-			Lg.i(TAG, "mcounter " +mCounter);
-			mCounter = 0;
-			mBlockModel.deleteItem(deleted);
+			mBlockMap2.setTop(tmp);
 		}
 	}
 	
@@ -247,6 +154,5 @@ implements BlockMap.Generater
 	
 	public void free(){	
 	}
-	
 	
 }
