@@ -4,6 +4,7 @@ import com.fwgg8547.loop2.gamebase.util.*;
 import com.fwgg8547.loop2.gamebase.modelbase.*;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class AnimationSequencer
 {
@@ -104,7 +105,20 @@ public class AnimationSequencer
 		}
 		mAnimFrame.tvalid = true;
 	}
-	
+
+	public void Initialize(TextureSequence[] ms, int init, ItemBase i, Callback cb){
+		mAnimFrame.tvalid = false;
+		mAnimFrame.tindex = init;
+		mTextureSequence = ms;
+		mTick = 0;
+		mAnimFrame.ttick = mTextureSequence[0].frame;
+		if(cb != null){
+			mCallbacks.add(cb);
+			mOwnerItem = i;
+		}
+		mAnimFrame.tvalid = true;
+	}
+
 	public void Initialize(MotionSequnce[] ms, RotateSequence[] rs ,ScaleSequence[] as, TextureSequence[] ts, ItemBase i, Callback cb){
 		mAnimFrame.mvalid = false;
 		mAnimFrame.rvalid = false;

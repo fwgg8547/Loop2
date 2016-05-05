@@ -1,4 +1,5 @@
 package com.fwgg8547.loop2.generater;
+import com.fwgg8547.loop2.GameConfig;
 import com.fwgg8547.loop2.model.*;
 import com.fwgg8547.loop2.gamebase.util.*;
 import java.util.*;
@@ -7,12 +8,13 @@ public class BlockCreatePattern
 {
 	private static final String TAG = BlockCreatePattern.class.getSimpleName();
 	private int mCreateStage;
-	private BlockMap.Direction mCreateDirection;
+	private int mPrevioursPos;
 	private Random mRand;
 	
 	public BlockCreatePattern(){}
 	
 	public void initialize(){
+		mPrevioursPos = 0;
 		mRand = new Random();
 	}
 	
@@ -28,8 +30,7 @@ public class BlockCreatePattern
 			}
 		} else {
 			Lg.i(TAG, "Create Stage 1");
-			mCreateDirection = (mRand.nextInt(2) ==0)? BlockMap.Direction.Left:BlockMap.Direction.Right;
-			
+
 			// add horizontal
 			poslist = addBlockAtTopWidth();
 			if(poslist.size() > 0){
@@ -51,9 +52,10 @@ public class BlockCreatePattern
 		// create block num
 		int count = mRand.nextInt(2)+1;
 		int created = 0;
-		for(int i=0; i<BlockMap.MAPINITIALW;i++){
-			if( mRand.nextBoolean() && before[i] != null){
+		for(int i = 0; i< GameConfig.MAPINITIALW; i++){
+			if( mRand.nextBoolean() && before[i] != null && mPrevioursPos != i){
 				poslist.add(i);
+				mPrevioursPos = i;
 				created++;
 			}
 			if( created >= count) {
@@ -68,7 +70,7 @@ public class BlockCreatePattern
 	private List<Integer> addBlockAtTopWidth(){
 		List<Integer> poslist = new ArrayList<Integer>();
 		
-		for(int i=0; i<BlockMap.MAPINITIALW; i++){
+		for(int i=0; i<GameConfig.MAPINITIALW; i++){
 			poslist.add(i);
 		}
 		

@@ -68,6 +68,7 @@ public class GLEngine extends GLEngineBase
 		ResourceFileReader rf = new ResourceFileReader(mContext);
 		rf.loadPattern();
 		rf.loadSequence();
+		GameConfig.INSTANCE.initialize();
 		super.initialize();
 	}
 	

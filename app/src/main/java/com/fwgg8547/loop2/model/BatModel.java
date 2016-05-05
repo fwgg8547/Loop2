@@ -121,7 +121,7 @@ public class BatModel extends CollisionModel
 	@Override
 	public int getTextureId()
 	{
-		return  R.drawable.wall_image;
+		return  R.drawable.battpict;
 	}
 
 	public void initialize(ReadersWriterLock lock, int offset, ModelGroup mg, int p){
@@ -314,12 +314,10 @@ public class BatModel extends CollisionModel
 		it.setId(mIdOffset+mIdCurr);
 		mIdCurr++;
 		it.setSprite(s);
-		if(p.mInitPos != null){
-			it.setPosition(p.mInitPos.x, p.mInitPos.y, 0.0f, 0.0f);
-		}
-		if(p.mRect != null){
-			it.setRect(p.mRect);
-		}
+
+			it.setPosition(GameConfig.BATTINITPOSX, GameConfig.BATTINITPOSY, 0.0f, 0.0f);
+			it.setRect(new RectF(-1*GameConfig.HEIGHT, -1*GameConfig.WIDTH, GameConfig.HEIGHT, GameConfig.WIDTH));
+
 		if(p.mMotionPattern != null){
 			it.setMotionPattern(p.mMotionPattern, null);
 		}
@@ -358,6 +356,7 @@ public class BatModel extends CollisionModel
 			new MotionSequnce(-1, 0f, null)
 		};
 		mDeleting = true;
+		Lg.i(TAG, "batt item delete");
 		it.delete(p);
 	}
 }

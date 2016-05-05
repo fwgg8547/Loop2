@@ -1,5 +1,6 @@
 package com.fwgg8547.loop2.generater;
 
+import com.fwgg8547.loop2.GameConfig;
 import com.fwgg8547.loop2.gamebase.util.Vec2;
 import com.fwgg8547.loop2.gamebase.sequencerbase.MotionSequnce;
 import com.fwgg8547.loop2.gamebase.sequencerbase.*;
@@ -212,20 +213,20 @@ public class ResourceFileReader
 	}
 
 	private ItemPattern[] getItemPatternBlock(){
-		ItemPattern[] ip = new ItemPattern[BlockMap.MAPHEIGHT*BlockMap.MAPWIDTH];
-		float blocksize = BlockModel.WIDTH;
-		float battwidth = BatModel.WIDTH*2;
-		float pointsize = BatModel.CENTEROFFSET*2;
-		float offset = battwidth*BlockMap.MAPOFFSETW*-1;
+		ItemPattern[] ip = new ItemPattern[GameConfig.MAPHEIGHT*GameConfig.MAPWIDTH];
+		float blocksize = GameConfig.BLOCKWIDTH;
+		float battwidth = GameConfig.WIDTH*2;
+		float pointsize = GameConfig.CENTEROFFSET*2;
+		float offset = battwidth*GameConfig.MAPOFFSETW*-1;
 		int indx=0;
-		for(int i=0; i<BlockMap.MAPHEIGHT; i++){
-			for(int j = -BlockMap.MAPOFFSETW; j< BlockMap.MAPWIDTH-BlockMap.MAPOFFSETW; j++){
+		for(int i=0; i<GameConfig.MAPHEIGHT; i++){
+			for(int j = -GameConfig.MAPOFFSETW; j< GameConfig.MAPWIDTH - GameConfig.MAPOFFSETW; j++){
 				ip[indx] = new ItemPattern();
-				ip[indx].mInitPos = new PointF(j*battwidth, i*battwidth);
+				ip[indx].mInitPos = new PointF(j*battwidth+GameConfig.LEFTOFFSET, i*battwidth+GameConfig.BOTTOMOFFSET);
 				ip[indx].mMotionPattern = null;//mMotionPatternArray.get(1);
 				ip[indx].mRotatePattern = null;
 				ip[indx].mScalePattern = null;
-				ip[indx].mTexturePattern = null;
+				ip[indx].mTexturePattern = mTexturePatternArray.get(2);
 				ip[indx].mRect = new RectF(
 				-blocksize/2f,-blocksize/2f,
 				 blocksize/2f, blocksize/2f);

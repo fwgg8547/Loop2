@@ -95,7 +95,7 @@ BatModel.DirectionDetectListener
 		ScrollManager.Direct d = getHitDirect(r);
 		Lg.i(TAG, "Hit DIRECT = " + d);
 		if(d == ScrollManager.Direct.NONE){
-			Lg.i(TAG, "Direct None");
+			Lg.i(TAG, "Delete Batt");
 			mBatt.deleteItem((CollidableItem)mBatt.getItemArray().get(0), r);
 			return;
 		}else{
@@ -183,12 +183,12 @@ BatModel.DirectionDetectListener
 		
 		
 		PointF center = mBatt.getItemArray().get(0).getPosition();
-    RectF rect = new RectF(center.x - BatModel.WIDTH*2, center.y-BatModel.WIDTH*2, center.x+BatModel.WIDTH*2, center.y+BatModel.WIDTH*2);
+    RectF rect = new RectF(center.x - GameConfig.WIDTH*2, center.y-GameConfig.WIDTH*2, center.x+GameConfig.WIDTH*2, center.y+GameConfig.WIDTH*2);
     List<CollidableItem> cl = mCollisitionManager.getCollisionItem(rect);
 		Iterator<CollidableItem> ite = cl.iterator();
 		
 		Lg.w(TAG, "auto move " +d);
-    Lg.d(TAG, "BatModel angle center x=" + mBatt.getAngleCenter().x + "|y="+mBatt.getAngleCenter().y);
+		Lg.d(TAG, "BatModel angle center x=" + mBatt.getAngleCenter().x + "|y="+mBatt.getAngleCenter().y);
 		Lg.i(TAG, "BatModel position x=" + mBatt.getItemArray().get(0).getPosition().x + "|y="+mBatt.getItemArray().get(0).getPosition().y);
 		Lg.i(TAG, "collision test rect left= " + rect.left + " top "+ rect.top + " right " + rect.right + " bottom " + rect.bottom);
 		Lg.i(TAG, "detected block size is " + cl.size());
@@ -196,33 +196,33 @@ BatModel.DirectionDetectListener
     while(ite.hasNext()){
 			CollidableItem item = ite.next();
 			PointF counter = item.getPosition();
-			Lg.i(TAG, "collision item " + counter.x +" | "+ counter.y);
+			Lg.d(TAG, "collision item " + counter.x +" | "+ counter.y);
 			
       if(d == ScrollManager.Direct.LEFT && 
 			counter.x < center.x && 
-			(counter.y < center.y + BlockModel.WIDTH &&
-			counter.y > center.y - BlockModel.WIDTH)) {
+			(counter.y < center.y + GameConfig.WIDTH &&
+			counter.y > center.y - GameConfig.WIDTH)) {
 				move = true;
 				break;
 			} 
 			if(d == ScrollManager.Direct.RIGHT && 
 			counter.x > center.x && 
-			(counter.y < center.y + BlockModel.WIDTH &&
-			counter.y > center.y - BlockModel.WIDTH)) {
+			(counter.y < center.y + GameConfig.WIDTH &&
+			counter.y > center.y - GameConfig.WIDTH)) {
 				move = true;
 				break;
 			}
 			if(d == ScrollManager.Direct.UP && 
 			counter.y > center.y && 
-			(counter.x < center.x + BlockModel.WIDTH &&
-			counter.x > center.x - BlockModel.WIDTH)) {
+			(counter.x < center.x + GameConfig.WIDTH &&
+			counter.x > center.x - GameConfig.WIDTH)) {
 				move = true;
 				break;
 			}
 			if(d == ScrollManager.Direct.DOWN && 
 			counter.y < center.y && 
-			(counter.x < center.x + BlockModel.WIDTH &&
-			counter.x > center.x - BlockModel.WIDTH)){
+			(counter.x < center.x + GameConfig.WIDTH &&
+			counter.x > center.x - GameConfig.WIDTH)){
 				move = true;
 				break;
 			}
