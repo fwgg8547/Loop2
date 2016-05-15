@@ -34,9 +34,9 @@ BatModel.DirectionDetectListener
 {
 	private final static String TAG = GLController.class.getSimpleName();
 	
-	
 	private BlockModel mBlock;
 	private BlockGenerater mBlockGenerater;
+	private ScrollManager mScrollManager;
 	private BatModel mBatt;
 	private WallModel2 mWall;
 	private ScrollSequencer mScrollSequencer;
@@ -60,6 +60,7 @@ BatModel.DirectionDetectListener
 		mCollisionList = new ArrayList<ItemBase>();
 		mScrollSequencer = new ScrollSequencer();
 		mScrollSequencer.initilaize();
+		mScrollManager = new ScrollManager();
 		mIsReady = false;
 		mAutoDirect = ScrollManager.Direct.NONE;
 	}
@@ -67,7 +68,7 @@ BatModel.DirectionDetectListener
 	@Override
 	public void levelChanged(int newLevel)
 	{
-		// TODO: Implement this method
+		mScrollSequencer.changeDirectRequest();
 	}
 
 	@Override
@@ -92,6 +93,7 @@ BatModel.DirectionDetectListener
 		}
 		
 		Lg.w(TAG,"onDown angle = " + r);
+		DebugText.set("Touch : " + r);
 		ScrollManager.Direct d = getHitDirect(r);
 		Lg.i(TAG, "Hit DIRECT = " + d);
 		if(d == ScrollManager.Direct.NONE){
@@ -105,7 +107,9 @@ BatModel.DirectionDetectListener
 		List<CollidableItem>cl =  mCollisitionManager.getCollisionItem((CollidableItem)mBatt.getItemArray().get(0));
 		if(cl.size() >= 2){
 			Lg.d(TAG, "hit block when touch " +cl.size());
-			mBatt.updatePosition(d);
+			BlockItem bitm = getCollisionItem(cl, d);
+			int bcw = (bitm.getBlockType() == BlockItem.Type.RIGHT)? 0:1;
+			mBatt.updatePosition(d, bcw);
 			scroll(d);
 		} else {
 			Lg.i(TAG, "block < 2");
@@ -128,6 +132,54 @@ BatModel.DirectionDetectListener
 		} else {
 			return ScrollManager.Direct.NONE;
 		}
+	}
+	
+	private BlockItem getCollisionItem(List<CollidableItem> cl, ScrollManager.Direct d){
+		Iterator ite = cl.iterator();
+		BlockItem most = null;
+		switch(d){
+			case UP:
+				while(ite.hasNext()){
+					BlockItem bi = (BlockItem)ite.next();
+					most = (most == null)? bi : most;
+					if(most.getPosition().y < bi.getPosition().y){
+						most = bi;
+					}
+				}
+			break;
+				
+			case DOWN:
+				while(ite.hasNext()){
+					BlockItem bi = (BlockItem)ite.next();
+					most = (most == null)? bi : most;
+					if(most.getPosition().y > bi.getPosition().y){
+						most = bi;
+					}
+				}
+			break;
+			
+			case RIGHT:
+				while(ite.hasNext()){
+					BlockItem bi = (BlockItem)ite.next();
+					most = (most == null)? bi : most;
+					if(most.getPosition().x < bi.getPosition().x){
+						most = bi;
+					}
+				}
+			break;
+			
+			case LEFT:
+				while(ite.hasNext()){
+					BlockItem bi = (BlockItem)ite.next();
+					most = (most == null)? bi : most;
+					if(most.getPosition().x > bi.getPosition().x){
+						most = bi;
+					}
+				}
+			break;
+		}
+		
+		return most;
 	}
 	
 	@Override
@@ -181,12 +233,11 @@ BatModel.DirectionDetectListener
 			return;
 		}
 		
-		
 		PointF center = mBatt.getItemArray().get(0).getPosition();
     RectF rect = new RectF(center.x - GameConfig.WIDTH*2, center.y-GameConfig.WIDTH*2, center.x+GameConfig.WIDTH*2, center.y+GameConfig.WIDTH*2);
     List<CollidableItem> cl = mCollisitionManager.getCollisionItem(rect);
 		Iterator<CollidableItem> ite = cl.iterator();
-		
+		CollidableItem item = null;
 		Lg.w(TAG, "auto move " +d);
 		Lg.d(TAG, "BatModel angle center x=" + mBatt.getAngleCenter().x + "|y="+mBatt.getAngleCenter().y);
 		Lg.i(TAG, "BatModel position x=" + mBatt.getItemArray().get(0).getPosition().x + "|y="+mBatt.getItemArray().get(0).getPosition().y);
@@ -194,7 +245,7 @@ BatModel.DirectionDetectListener
 		Lg.i(TAG, "detected block size is " + cl.size());
 		
     while(ite.hasNext()){
-			CollidableItem item = ite.next();
+			item = ite.next();
 			PointF counter = item.getPosition();
 			Lg.d(TAG, "collision item " + counter.x +" | "+ counter.y);
 			
@@ -229,7 +280,9 @@ BatModel.DirectionDetectListener
     }
 		
 		if(move){
-			mBatt.updatePosition(d);
+			Lg.i(TAG, "automove " +d);
+			int cw = (((BlockItem)item).getBlockType() == BlockItem.Type.RIGHT)? 0:1;
+			mBatt.updatePosition(d, cw);
 			scroll(d);
 		}
 	}
@@ -312,11 +365,17 @@ BatModel.DirectionDetectListener
 			ItemBase i =  mBatt.createItem(0);
 			i.setType(GLEngine.BATTMODELINDX);
 			mBlockGenerater.createInitialItem();
-			CollidableItem.setOffsetVect(new Vec2(0, GameConfig.SCROLLVELOCITY));
 			mIsFirstUpdate = false;
 			mIsReady = true;
 		} else if (GameConfig.COMMONSCROLL != 0) {
-			mScrollSequencer.onUpdate();
+	
+			boolean b = mScrollSequencer.onUpdate();
+			if(b){
+				// create block when scroll break event
+				mBlockGenerater.createRequest();
+			}
+			
+			
 		}
 		super.onUpdate();
 		

@@ -28,7 +28,7 @@ public class BlockModel extends CollisionModel
 {
 	
 	private static final String TAG = BlockModel.class.getSimpleName();
-	public static final int MAX_BLOCK = GameConfig.MAPWIDTH*GameConfig.MAPHEIGHT+GameConfig.MAPWIDTH;
+	public static final int MAX_BLOCK = GameConfig.MAPWIDTH*GameConfig.MAPHEIGHT+GameConfig.MAPHEIGHT*3;
 	private static boolean mIsFirstUpdate;
 	private static MoveChecker mMoveChecker;
 	private Generater mGenerater;
@@ -87,7 +87,8 @@ public class BlockModel extends CollisionModel
 					i--; // mblock was reduced
 				}
 				
-				if(itm.getPosition().y < GameConfig.DELETEMERGIN) {
+				if(itm.getPosition().y < GameConfig.DELETEMERGIN ||
+						itm.getPosition().x < GameConfig.DELETEMERGIN) {
 					itm.mIsDeleted = true;
 				}
 				
@@ -143,6 +144,24 @@ public class BlockModel extends CollisionModel
 		return ib;		
 	}
 	
+	public ItemBase createItem(float x, float y){
+		BlockItem ib = null;
+		try{
+			mLock.writeLock();
+			ib = (BlockItem)super.createItem();
+			ib.setType(GLEngine.BLOCKMODELINDX);
+			ItemPattern p = ResourceFileReader.getPattern(ResourceFileReader.Type.Block, 0);
+			p.mInitPos.y = y;
+			p.mInitPos.x = x;
+			mGenerater.createItem(ib, p);
+		} catch (Exception e){
+			Lg.e(TAG, e.toString());
+		} finally {
+			mLock.writeUnlock();
+		}
+		return ib;		
+	}
+	
 	@Override
 	public ItemBase createItem(int pattern)
 	{
@@ -180,7 +199,7 @@ public class BlockModel extends CollisionModel
 	@Override
 	public int getTextureId()
 	{
-		return R.drawable.blockpict;
+		return R.drawable.circle;
 	}
 
 	@Override
@@ -269,7 +288,6 @@ public class BlockModel extends CollisionModel
 					Random rand = new Random();
 					it.setTexturePattern(p.mTexturePattern, rand.nextInt(9),  null);
 				}
-				it.setBlockType(p.mItemId);
 				it.setAnimationValid(true);
 				it.moveAnimation(); // init 
 				it.updateVertix();

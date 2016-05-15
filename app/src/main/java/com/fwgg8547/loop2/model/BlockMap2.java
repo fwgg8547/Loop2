@@ -20,14 +20,33 @@ public class BlockMap2
 	
 	public void initialize(){
 		mTopItems = new BlockItem[GameConfig.MAPINITIALW];
+		mRightItems = new BlockItem[GameConfig.MAPHEIGHT];
+		mLeftItems = new BlockItem[GameConfig.MAPHEIGHT];
 		mBottomItems = new BlockItem[GameConfig.MAPINITIALW];
 	}
 	
 	public void setTop(BlockItem[] top){
 		System.arraycopy(top, 0, mTopItems, 0, mTopItems.length);
+	
+		//
+		for(int i=1; i < GameConfig.MAPHEIGHT; i++){
+			mRightItems[i-1] = mRightItems[i];
+		}
+		mRightItems[GameConfig.MAPHEIGHT-1] = mTopItems[GameConfig.MAPINITIALW-1];
 	}
 	
 	public BlockItem[] getTop(){
 		return mTopItems;
 	}
+	
+	public void setRight(BlockItem[] right){
+		System.arraycopy(right, 0, mRightItems, 0, mRightItems.length);
+		
+	}
+
+	public BlockItem[] getRight(){
+		return mRightItems;
+	}
+	
+	
 }

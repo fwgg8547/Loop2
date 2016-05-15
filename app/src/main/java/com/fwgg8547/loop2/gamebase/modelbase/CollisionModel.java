@@ -105,7 +105,7 @@ abstract public class CollisionModel extends SpriteModel implements ScrollableMo
 			mLock.writeLock();
 			CollidableItem.setOffsetVect(v);
 		} catch(Exception e){
-
+			Lg.e(TAG,e.toString());
 		} finally {
 			mLock.writeUnlock();
 		}

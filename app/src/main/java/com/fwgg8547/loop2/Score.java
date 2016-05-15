@@ -27,7 +27,16 @@ public class Score extends ScoreBase
 	public void add(int s){
 		super.add(s);
 		mCount.setText("" + mScore);
+		checkLevelUp();
 	}
 	
+	private void checkLevelUp(){
+		if((mScore +1)%10 == 0){
+			mLevel++;
+			if(mCallback != null){
+				mCallback.levelChanged(mLevel);
+			}
+		}
+	}
 	
 }

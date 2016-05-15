@@ -8,32 +8,27 @@ public class BlockItem extends CollidableItem
 	private Type mType;
 	
 	public enum Type{
-		BLACK,
-		WHITE,
+		RIGHT,
+		LEFT,
 	}
 	
 	public BlockItem(){
 		super();
 	}
 	
-	public void setBlockType(int t){
+	public void setBlockType(Type t){
 		switch(t){
-			case 0:
-				mType = Type.BLACK;
+			case RIGHT:
+				mType = Type.RIGHT;
 				mSprite.setColor(new float[]{1,1,1,1 });
 				break;
 			default :
-				mType = Type.WHITE;
+				mType = Type.LEFT;
 				mSprite.setColor(new float[]{1,0,0,1 });
 		}
 	}
 	
-	public int getBlockType(){
-		switch(mType){
-			case BLACK:
-				return 0;
-			default:
-				return 1;
-		}
+	public Type getBlockType(){
+		return mType;
 	}
 }

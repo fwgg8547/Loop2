@@ -276,10 +276,12 @@ public class CollidableItem extends ItemBase implements ScrollableItem
 				}
 				*/
 				);
+			Lg.i(TAG, "setscaled");
 		} else {
 			mIsDeleted = true;
 		}
 		removeBody();
+		Lg.i(TAG, "removebody");
 	}
 	
 	/*

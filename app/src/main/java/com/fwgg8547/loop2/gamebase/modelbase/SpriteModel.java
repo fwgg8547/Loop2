@@ -61,7 +61,7 @@ abstract public class SpriteModel extends ModelBase implements ItemGeneraterBase
 				itm.setMotionPattern(ms,null);
 			}
 		} catch(Exception e){
-
+			Lg.e(TAG, e.toString());
 		} finally {
 			mLock.writeUnlock();
 		}

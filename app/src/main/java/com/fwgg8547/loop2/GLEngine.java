@@ -43,10 +43,12 @@ public class GLEngine extends GLEngineBase
 	public static final int PRIWALL = PRIBACK + 1;
 	public static final int PRIBLOCK = PRIWALL + 1;
 	public static final int PRIBATT = PRIBLOCK + 1;
-	public static final int PRITEXT = PRIBATT;
+	public static final int PRITEXT = PRIBATT  +1;
+	public static final int PRIDEBUG = PRITEXT +1;
 	// non collidable
 	public static final int BACKMODELINDX = 0;
-	public static final int TEXTMODELIDX = BACKMODELINDX +1;
+	public static final int TEXTMODELINDX = BACKMODELINDX +1;
+	public static final int DEBUGMODELINDX = TEXTMODELINDX +1;
 	// collidable
 	public static final int WALLMODELINDX = 0;
 	public static final int BATTMODELINDX = WALLMODELINDX + 1;
@@ -87,8 +89,12 @@ public class GLEngine extends GLEngineBase
 		ml.add(bm);
 		
 		TextModelBase txm = new TextModelBase();
-		txm.initialize(lock, 150, PRITEXT);
+		txm.initialize(lock, 10, PRITEXT);
 		ml.add(txm);
+		
+		DebugText dt = new DebugText();
+		dt.initialize(lock, 10, PRIDEBUG);
+		ml.add(dt);
 		
 	}
 	
@@ -142,7 +148,7 @@ public class GLEngine extends GLEngineBase
 	protected ScoreBase createScore(List<ModelBase>ml){
 		Lg.i(TAG,"createScore");
 		mScore = new Score(mContext, mController);
-		mScore.addTextModel((TextModelBase)ml.get(TEXTMODELIDX));
+		mScore.addTextModel((TextModelBase)ml.get(TEXTMODELINDX));
 		mScore.initialize();
 		return mScore;
 	}

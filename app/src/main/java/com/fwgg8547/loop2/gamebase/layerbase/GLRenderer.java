@@ -91,11 +91,7 @@ public class GLRenderer implements Renderer
 				mLayers.add(l);
 			} 
 		}
-		/*
-		OpenglLayer l = new BackgroundLayer();
-		l.initialize(0);
-		mLayers.add(l);
-		*/
+	
 		Collections.sort(mLayers, new LayerComparator());
 	}
 
@@ -196,8 +192,9 @@ public class GLRenderer implements Renderer
 		setupTexture();
 		
 		// Set the clear color to black
-		GLES20.glClearColor(184f/255f, 194f/255f, 159f/255f, 1);
-
+		//GLES20.glClearColor(184f/255f, 194f/255f, 159f/255f, 1);
+		
+		GLES20.glClearColor(255f, 255f, 255f, 1);
 		// Create sold shader
 		int vertexShader = riGraphicTools.loadShader(GLES20.GL_VERTEX_SHADER, riGraphicTools.vs_SolidColor);
 		int fragmentShader = riGraphicTools.loadShader(GLES20.GL_FRAGMENT_SHADER, riGraphicTools.fs_SolidColor);
