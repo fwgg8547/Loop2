@@ -9,3 +9,4 @@ gradlew
 gradlew.bat
 local.properties
 settings.gradle
+app/src/main/res/drawable-mdpi/battpict2.png
