@@ -229,15 +229,12 @@ public class BatModel extends CollisionModel
 		
 		try{
 			mLock.writeLock();
-			
-			if(cw == getAngleTggle()){
-				setAngleTggle();
+			if(cw != getAngleTggle()){
+				rotatePosition(di);
+			} else {
+				counterRotatePosition(di);
 			}
-		
-			setAngleDelta(GameConfig.RVELOCITY);
-			setCenterOffset(new Vec2(0,GameConfig.CENTEROFFSET));
-		
-		
+
 		}catch(Exception e){
 			Lg.e(TAG, e.toString());
 		} finally{
@@ -247,57 +244,30 @@ public class BatModel extends CollisionModel
 	}
 
 	private void rotatePosition(ScrollManager.Direct di){
-		int clockwise = getAngleTggle();
-		
+
 		for(int i=0,n=mItemList.size();i<n;i++){
 			CollidableItem itm = (CollidableItem)mItemList.get(i);
-			Vec2 p = itm.getCenterOffset();
+			Vec2 p = new Vec2(0,0);
+			itm.setAngleDelta(180);
 			Lg.d(TAG, "Item Center " +"x="+p.x+":y="+p.y+":Angle="+itm.getAngle());
-
 			switch(di){
 				case UP:
 					Lg.d(TAG, "UP");
-					if(clockwise > 0){
-						p.y-=GameConfig.DIFF;
-						p.rotateDeg(180);
-					} else {
-						p.y+=GameConfig.DIFF;
-					}
+					p.y+=(GameConfig.WIDTH*2);
 					break;
 				case DOWN:
 					Lg.d(TAG, "DOWN");
-					if(clockwise < 0){
-						p.y+=GameConfig.DIFF;
-						p.rotateDeg(180);
-					} else{
-						p.y-=GameConfig.DIFF;
-					}
+					p.y-=(GameConfig.WIDTH*2);
 					break;
-
 				case LEFT:
 					Lg.d(TAG, "LEFT");
-					if(clockwise > 0){
-						p.y-=GameConfig.DIFF;
-						p.rotateDeg(270);
-					} else {
-						p.y+=GameConfig.DIFF;
-						p.rotateDeg(90);
-					}
+					p.x-=(GameConfig.WIDTH*2);
 					break;
-
 				case RIGHT:
 					Lg.d(TAG, "RIGHT");
-					if(clockwise > 0){
-						p.y-=GameConfig.DIFF;
-						p.rotateDeg(90);
-					} else{
-						p.y+=GameConfig.DIFF;
-						p.rotateDeg(270);
-					}
+					p.x+=(GameConfig.WIDTH*2);
 					break;
 			}
-			p.multiply(2);
-
 			Lg.i(TAG,"Before Item Position "+"x=" +itm.getPosition().x+":y="+itm.getPosition().y);
 			Lg.i(TAG,"new position vect " +"x="+p.x+":y="+p.y);
 			itm.setPositionDelta(p.x,p.y);
@@ -308,7 +278,10 @@ public class BatModel extends CollisionModel
 	
 	private void counterRotatePosition(ScrollManager.Direct di){
 		int clockwise = getAngleTggle();
-		
+		setAngleTggle();
+		setAngleDelta(GameConfig.RVELOCITY);
+		setCenterOffset(new Vec2(0,GameConfig.CENTEROFFSET));
+
 		for(int i=0,n=mItemList.size();i<n;i++){
 			CollidableItem itm = (CollidableItem)mItemList.get(i);
 			Vec2 p = itm.getCenterOffset();
@@ -357,7 +330,6 @@ public class BatModel extends CollisionModel
 					break;
 			}
 			p.multiply(2);
-
 			Lg.i(TAG,"Before Item Position "+"x=" +itm.getPosition().x+":y="+itm.getPosition().y);
 			Lg.i(TAG,"new position vect " +"x="+p.x+":y="+p.y);
 			itm.setPositionDelta(p.x,p.y);
