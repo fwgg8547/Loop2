@@ -56,7 +56,8 @@ public class BatModel extends CollisionModel
 					new InnerEvent().notifyEvent(InnerEvent.InnerMessage.Event.GameOver);
 				}
 				
-				if(itm.getPosition().y < GameConfig.DELETEMERGIN) {
+				if(itm.getPosition().y < GameConfig.DELETEMERGIN ||
+				itm.getPosition().x < GameConfig.DELETEMERGIN) {
 					itm.mIsDeleted = true;
 				}
 			}
@@ -79,6 +80,7 @@ public class BatModel extends CollisionModel
 					}
 					
 					direct = autoMove(r);
+					
 				}
 				
 			}
@@ -91,7 +93,10 @@ public class BatModel extends CollisionModel
 		if(GameConfig.AUTOMOVE==1 && 
 		mListener != null &&
 		direct != ScrollManager.Direct.NONE){
+			//mItemList.get(0).setColor(new float[]{0,0,0,0});
 	 		mListener.notifyDirect(direct);
+		} else {
+			//mItemList.get(0).setColor(new float[]{0,1,1,1});
 		}
 	}
 
@@ -121,7 +126,7 @@ public class BatModel extends CollisionModel
 	@Override
 	public int getTextureId()
 	{
-		return  R.drawable.wall_image;
+		return  R.drawable.battpict;
 	}
 
 	public void initialize(ReadersWriterLock lock, int offset, ModelGroup mg, int p){
@@ -220,70 +225,16 @@ public class BatModel extends CollisionModel
 		}
 	}
 	
-	public void updatePosition(ScrollManager.Direct di){
+	public void updatePosition(ScrollManager.Direct di, int cw){
 		
 		try{
 			mLock.writeLock();
-			int clockwise = getAngleTggle();
-			setAngleTggle();
-			setAngleDelta(GameConfig.RVELOCITY);
-			setCenterOffset(new Vec2(0,GameConfig.CENTEROFFSET));
-		
-			for(int i=0,n=mItemList.size();i<n;i++){
-				CollidableItem itm = (CollidableItem)mItemList.get(i);
-				Vec2 p = itm.getCenterOffset();
-				Lg.d(TAG, "Item Center " +"x="+p.x+":y="+p.y+":Angle="+itm.getAngle());
-			
-				switch(di){
-					case UP:
-						Lg.d(TAG, "UP");
-						if(clockwise > 0){
-							p.y-=GameConfig.DIFF;
-							p.rotateDeg(180);
-						} else {
-							p.y+=GameConfig.DIFF;
-						}
-						break;
-					case DOWN:
-						Lg.d(TAG, "DOWN");
-						if(clockwise < 0){
-							p.y+=GameConfig.DIFF;
-							p.rotateDeg(180);
-						} else{
-							p.y-=GameConfig.DIFF;
-						}
-						break;
-						
-					case LEFT:
-						Lg.d(TAG, "LEFT");
-						if(clockwise > 0){
-							p.y-=GameConfig.DIFF;
-							p.rotateDeg(270);
-						} else {
-							p.y+=GameConfig.DIFF;
-							p.rotateDeg(90);
-						}
-						break;
-					
-					case RIGHT:
-						Lg.d(TAG, "RIGHT");
-						if(clockwise > 0){
-							p.y-=GameConfig.DIFF;
-							p.rotateDeg(90);
-						} else{
-							p.y+=GameConfig.DIFF;
-							p.rotateDeg(270);
-						}
-						break;
-				}
-				p.multiply(2);
-				
-				Lg.i(TAG,"Before Item Position "+"x=" +itm.getPosition().x+":y="+itm.getPosition().y);
-				Lg.i(TAG,"new position vect " +"x="+p.x+":y="+p.y);
-				itm.setPositionDelta(p.x,p.y);
-				PointF newPos = itm.getPosition();
-				itm.setAngleCenter(newPos);
+			if(cw != getAngleTggle()){
+				rotatePosition(di);
+			} else {
+				counterRotatePosition(di);
 			}
+
 		}catch(Exception e){
 			Lg.e(TAG, e.toString());
 		} finally{
@@ -292,6 +243,101 @@ public class BatModel extends CollisionModel
 		}
 	}
 
+	private void rotatePosition(ScrollManager.Direct di){
+
+		for(int i=0,n=mItemList.size();i<n;i++){
+			CollidableItem itm = (CollidableItem)mItemList.get(i);
+			Vec2 p = new Vec2(0,0);
+			itm.setAngleDelta(180);
+			Lg.d(TAG, "Item Center " +"x="+p.x+":y="+p.y+":Angle="+itm.getAngle());
+			switch(di){
+				case UP:
+					Lg.d(TAG, "UP");
+					p.y+=(GameConfig.WIDTH*2);
+					break;
+				case DOWN:
+					Lg.d(TAG, "DOWN");
+					p.y-=(GameConfig.WIDTH*2);
+					break;
+				case LEFT:
+					Lg.d(TAG, "LEFT");
+					p.x-=(GameConfig.WIDTH*2);
+					break;
+				case RIGHT:
+					Lg.d(TAG, "RIGHT");
+					p.x+=(GameConfig.WIDTH*2);
+					break;
+			}
+			Lg.i(TAG,"Before Item Position "+"x=" +itm.getPosition().x+":y="+itm.getPosition().y);
+			Lg.i(TAG,"new position vect " +"x="+p.x+":y="+p.y);
+			itm.setPositionDelta(p.x,p.y);
+			PointF newPos = itm.getPosition();
+			itm.setAngleCenter(newPos);
+		}
+	}
+	
+	private void counterRotatePosition(ScrollManager.Direct di){
+		int clockwise = getAngleTggle();
+		setAngleTggle();
+		setAngleDelta(GameConfig.RVELOCITY);
+		setCenterOffset(new Vec2(0,GameConfig.CENTEROFFSET));
+
+		for(int i=0,n=mItemList.size();i<n;i++){
+			CollidableItem itm = (CollidableItem)mItemList.get(i);
+			Vec2 p = itm.getCenterOffset();
+			Lg.d(TAG, "Item Center " +"x="+p.x+":y="+p.y+":Angle="+itm.getAngle());
+
+			switch(di){
+				case UP:
+					Lg.d(TAG, "UP");
+					if(clockwise > 0){
+						p.y-=GameConfig.DIFF;
+						p.rotateDeg(180);
+					} else {
+						p.y+=GameConfig.DIFF;
+					}
+					break;
+				case DOWN:
+					Lg.d(TAG, "DOWN");
+					if(clockwise < 0){
+						p.y+=GameConfig.DIFF;
+						p.rotateDeg(180);
+					} else{
+						p.y-=GameConfig.DIFF;
+					}
+					break;
+
+				case LEFT:
+					Lg.d(TAG, "LEFT");
+					if(clockwise > 0){
+						p.y-=GameConfig.DIFF;
+						p.rotateDeg(270);
+					} else {
+						p.y+=GameConfig.DIFF;
+						p.rotateDeg(90);
+					}
+					break;
+
+				case RIGHT:
+					Lg.d(TAG, "RIGHT");
+					if(clockwise > 0){
+						p.y-=GameConfig.DIFF;
+						p.rotateDeg(90);
+					} else{
+						p.y+=GameConfig.DIFF;
+						p.rotateDeg(270);
+					}
+					break;
+			}
+			p.multiply(2);
+			Lg.i(TAG,"Before Item Position "+"x=" +itm.getPosition().x+":y="+itm.getPosition().y);
+			Lg.i(TAG,"new position vect " +"x="+p.x+":y="+p.y);
+			itm.setPositionDelta(p.x,p.y);
+			PointF newPos = itm.getPosition();
+			itm.setAngleCenter(newPos);
+		}
+	}
+	
 	@Override
 	public ItemBase createItem(int pattern)
 	{
@@ -314,12 +360,10 @@ public class BatModel extends CollisionModel
 		it.setId(mIdOffset+mIdCurr);
 		mIdCurr++;
 		it.setSprite(s);
-		if(p.mInitPos != null){
-			it.setPosition(p.mInitPos.x, p.mInitPos.y, 0.0f, 0.0f);
-		}
-		if(p.mRect != null){
-			it.setRect(p.mRect);
-		}
+
+			it.setPosition(GameConfig.BATTINITPOSX, GameConfig.BATTINITPOSY, 0.0f, 0.0f);
+			it.setRect(new RectF(-1*GameConfig.HEIGHT, -1*GameConfig.WIDTH, GameConfig.HEIGHT, GameConfig.WIDTH));
+
 		if(p.mMotionPattern != null){
 			it.setMotionPattern(p.mMotionPattern, null);
 		}
@@ -358,6 +402,7 @@ public class BatModel extends CollisionModel
 			new MotionSequnce(-1, 0f, null)
 		};
 		mDeleting = true;
+		Lg.i(TAG, "batt item delete");
 		it.delete(p);
 	}
 }

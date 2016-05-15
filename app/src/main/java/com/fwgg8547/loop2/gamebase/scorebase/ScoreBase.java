@@ -18,6 +18,7 @@ public class ScoreBase implements GLControllerBase.Callback
 	private PreferenceLoader mPrefLoader;
 	protected static int mScore;
 	protected static int mHiScore;
+	protected static int mLevel;
 	protected TextModelBase mTextModel;
 	protected NotifyScore mCallback;
 	
@@ -63,6 +64,7 @@ public class ScoreBase implements GLControllerBase.Callback
 	public void initialize(){
 		Lg.d(TAG, "Score initialize");
 		mScore = 0;
+		mLevel = 0;
 	}
 
 	public void add(int s){
@@ -91,7 +93,7 @@ public class ScoreBase implements GLControllerBase.Callback
 		return mHiScore;
 	}
 	
-	public int getCurrentScore(){
+	static public int getCurrentScore(){
 		return mScore;
 	}
 }

@@ -1,5 +1,6 @@
 package com.fwgg8547.loop2.generater;
 
+import com.fwgg8547.loop2.GameConfig;
 import com.fwgg8547.loop2.gamebase.util.Vec2;
 import com.fwgg8547.loop2.gamebase.sequencerbase.MotionSequnce;
 import com.fwgg8547.loop2.gamebase.sequencerbase.*;
@@ -25,7 +26,7 @@ public class ResourceFileReader
 	public final static int BALLIDX = BACKIDX +1;
 	public final static int BATTIDX = BALLIDX +1;
 	public final static int WALLIDX = BATTIDX +1;
-	
+	public final static int TEXFRAME = 12;
 	public enum Type {
 		Block,
 		Back,
@@ -39,7 +40,6 @@ public class ResourceFileReader
 	private static List<RotateSequence[]> mRotatePatternArray;
 	private static List<ScaleSequence[]> mScalePatternArray;
 	private static List<TextureSequence[]> mTexturePatternArray;
-	private static int[] mItemIdPattern;
 	private static ItemPattern[][] mItemPattern;
 	private static int[] mLevelThresh;
 	private static List<ItemGeneraterBase.Sequence[]>mSqArray;
@@ -212,23 +212,24 @@ public class ResourceFileReader
 	}
 
 	private ItemPattern[] getItemPatternBlock(){
-		ItemPattern[] ip = new ItemPattern[BlockMap.MAPHEIGHT*BlockMap.MAPWIDTH];
-		float blocksize = BlockModel.WIDTH;
-		float battwidth = BatModel.WIDTH*2;
-		float pointsize = BatModel.CENTEROFFSET*2;
-		float offset = battwidth*BlockMap.MAPOFFSETW*-1;
+		ItemPattern[] ip = new ItemPattern[GameConfig.MAPHEIGHT*GameConfig.MAPWIDTH];
+		float blocksize = GameConfig.BLOCKWIDTH;
+		float battwidth = GameConfig.WIDTH*2;
+		float pointsize = GameConfig.CENTEROFFSET*2;
+		float offset = battwidth*GameConfig.MAPOFFSETW*-1;
 		int indx=0;
-		for(int i=0; i<BlockMap.MAPHEIGHT; i++){
-			for(int j = -BlockMap.MAPOFFSETW; j< BlockMap.MAPWIDTH-BlockMap.MAPOFFSETW; j++){
+		for(int i=0; i<GameConfig.MAPHEIGHT; i++){
+			for(int j = -GameConfig.MAPOFFSETW; j< GameConfig.MAPWIDTH - GameConfig.MAPOFFSETW; j++){
 				ip[indx] = new ItemPattern();
-				ip[indx].mInitPos = new PointF(j*battwidth, i*battwidth);
+				ip[indx].mInitPos = new PointF(j*battwidth+GameConfig.LEFTOFFSET, i*battwidth+GameConfig.BOTTOMOFFSET);
 				ip[indx].mMotionPattern = null;//mMotionPatternArray.get(1);
 				ip[indx].mRotatePattern = null;
 				ip[indx].mScalePattern = null;
-				ip[indx].mTexturePattern = null;
+				ip[indx].mTexturePattern = mTexturePatternArray.get(0);
 				ip[indx].mRect = new RectF(
 				-blocksize/2f,-blocksize/2f,
 				 blocksize/2f, blocksize/2f);
+				ip[indx].mType = 0;
 				indx++;
 			}
 		}
@@ -517,17 +518,23 @@ public class ResourceFileReader
 		msl.add(mTx);
 		
 		uv = makeUvPattern(3);
-		mTx = new TextureSequence[] {
-			new TextureSequence(30, uv[0]),
-			new TextureSequence(30, uv[1]),
-			new TextureSequence(30, uv[2]),
-			new TextureSequence(30, uv[3]),
-			new TextureSequence(30, uv[4]),
-			new TextureSequence(30, uv[5]),
-			new TextureSequence(30, uv[6]),
-			new TextureSequence(30, uv[7]),
-			new TextureSequence(30, uv[8]),
+		mTx = new TextureSequence[3*3];
+		for(int i =0; i < mTx.length; i++){
+			mTx[i] = new TextureSequence(TEXFRAME, uv[i]);
+		}
+		/*
+		{
+			new TextureSequence(TEXFRAME, uv[0]),
+			new TextureSequence(TEXFRAME, uv[1]),
+			new TextureSequence(TEXFRAME, uv[2]),
+			new TextureSequence(TEXFRAME, uv[3]),
+			new TextureSequence(TEXFRAME, uv[4]),
+			new TextureSequence(TEXFRAME, uv[5]),
+			new TextureSequence(TEXFRAME, uv[6]),
+			new TextureSequence(TEXFRAME, uv[7]),
+			new TextureSequence(TEXFRAME, uv[8]),
 		};
+		*/
 		msl.add(mTx);
 		
 		return msl;

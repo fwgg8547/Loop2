@@ -166,6 +166,15 @@ abstract public class ItemBase {
 		}
 	}
 
+	public void setTexturePattern(TextureSequence[] mp, int init, AnimationSequencer.Callback cb){
+		if(mp != null){
+			mAnimType = AnimType.MOTIONP;
+			mAnimSequencer.Initialize(mp, init, this, cb);
+		} else {
+			mAnimSequencer.stopTexture();
+		}
+	}
+
 	public void setPattern(MotionSequnce[] mp ,RotateSequence[] rs ,ScaleSequence[] ma, TextureSequence[] mt,AnimationSequencer.Callback cb){
 		mAnimType = AnimType.MOTIONP;
 		mAnimSequencer.Initialize(mp, rs, ma, mt, this, cb);

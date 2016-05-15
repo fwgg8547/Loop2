@@ -17,10 +17,9 @@ import android.graphics.PointF;
 
 public class BlockGenerater 
 extends ItemGeneraterBase
-implements BlockMap.Generater
 {
 	private final static String TAG = BlockGenerater.class.getSimpleName();
-	private final static int GENERATEPRIOD = 60;
+	private final static int GENERATEPRIOD = 50;
 	private boolean mIsReady=false;
 	private boolean mPending=false;
 	private BlockModel mBlockModel;
@@ -28,6 +27,9 @@ implements BlockMap.Generater
 	BlockCreatePattern mCreatePattern;
 	List<BlockItem> mDeletedItem;
 	Random mRand;
+	
+	private PointF mInitRightPos[];
+	private PointF mInitLeftPos[];
 	
 	public BlockGenerater(BlockModel m){
 		super(m);
@@ -70,34 +72,59 @@ implements BlockMap.Generater
 		if(mSequenceEnd || !mIsAutoMode){
 			return;
 		}
-		mCounter++;
+		//mCounter++;
 		
-		if(mCounter >= GENERATEPRIOD){
-			mCounter=0;
-			addNewLines();
+		if(mPending){
+			mPending=false;
+			addNewLines(ScrollSequencer.getDirection());
 		}
 		
 	}
 	
+	public void createRequest(){
+		mPending = true;
+	}
+	
 	private void createBoard(){
+		mInitLeftPos = new PointF[GameConfig.MAPHEIGHT];
+		mInitRightPos = new PointF[GameConfig.MAPHEIGHT];
+		BlockItem[] tmpR = new BlockItem[GameConfig.MAPHEIGHT];
+		
 		int indx=0;
-		for(int i=0; i<BlockMap.MAPHEIGHT-1; i++){
-			indx+=BlockMap.MAPOFFSETW;
-			for(int j=0; j<BlockMap.MAPINITIALW; j++){
+		for(int i=0; i<GameConfig.MAPHEIGHT-1; i++){
+			indx+=GameConfig.MAPOFFSETW;
+			for(int j=0; j<GameConfig.MAPINITIALW; j++){
 				BlockItem itm = (BlockItem)mBlockModel.createItem(indx);
+				if(j==0){
+					mInitLeftPos[i] = new PointF(itm.getPosition().x, itm.getPosition().y);
+				} else if (j==GameConfig.MAPINITIALW-1){
+					mInitRightPos[i] = new PointF(itm.getPosition().x, itm.getPosition().y);
+					tmpR[i] = itm;
+				}
 				indx++;
 			}
-			indx+=BlockMap.MAPOFFSETW;
+			indx+=GameConfig.MAPOFFSETW;
 		}
 		
 		// top line
-		BlockItem[] tmp = new BlockItem[BlockMap2.MAPINITIALW];
-		indx+=BlockMap.MAPOFFSETW;
-		for(int j=0; j<BlockMap2.MAPINITIALW; j++){
+		BlockItem[] tmp = new BlockItem[GameConfig.MAPINITIALW];
+		
+		
+		indx+=GameConfig.MAPOFFSETW;
+		for(int j=0; j<GameConfig.MAPINITIALW; j++){
 			tmp[j] = (BlockItem)mBlockModel.createItem(indx);
+			if(j==0){
+				mInitLeftPos[GameConfig.MAPHEIGHT-1] = 
+					new PointF(tmp[j].getPosition().x, tmp[j].getPosition().y);
+			} else if (j==GameConfig.MAPINITIALW-1){
+				mInitRightPos[GameConfig.MAPHEIGHT-1] = 
+					new PointF(tmp[j].getPosition().x, tmp[j].getPosition().y);
+				tmpR[GameConfig.MAPHEIGHT-1] = tmp[j];
+			}
 			indx++;
 		}
 		mBlockMap2.setTop(tmp);
+		mBlockMap2.setRight(tmpR);
 	}
 
 	@Override
@@ -106,22 +133,87 @@ implements BlockMap.Generater
 		createBoard();
 		mIsReady=true;
 	}
+	
+	private void addNewLines(ScrollManager.Direct d){
+		Lg.i(TAG, "add new lines current");
 
-	@Override
-	public BlockItem getNextItem(int pattern)
-	{
-		return (BlockItem)mBlockModel.createItem(pattern);
+		List<BlockCreatePattern.CreateInfo> poslist = mCreatePattern.getNextCreatePosition(d);
+		Lg.i(TAG,"new line size is " + poslist.size());
+
+		// get current y position of block
+		PointF beforePos = null;
+		BlockItem[] tmp = null;
+		
+		switch(d){
+			case DOWN:
+				tmp = mBlockMap2.getTop();
+				for (BlockItem bi : tmp){
+					if (bi != null) {
+						beforePos = bi.getPosition();
+						Lg.i(TAG, "current block Y position is " + beforePos.y);				
+						break;
+					}
+				}
+				// create new blocks
+				tmp = new BlockItem[GameConfig.MAPINITIALW];
+				if(beforePos != null && poslist != null && poslist.size() > 0){
+					Iterator ite = poslist.iterator();
+					while(ite.hasNext()){
+						int pos = ((BlockCreatePattern.CreateInfo) ite.next()).mPos;
+						BlockItem b = (BlockItem)mBlockModel.createItem(pos, beforePos.y+GameConfig.WIDTH*2);
+						tmp[pos] = b;
+					}
+					mBlockMap2.setTop(tmp);
+				}
+				break;
+			
+			case RIGHT:
+				PointF offset = new PointF(0,0);
+				tmp = mBlockMap2.getRight();
+				// calc offset position
+				/*
+				for (BlockItem bi : tmp){
+					if (bi != null) {
+						beforePos = bi.getPosition();
+						Lg.i(TAG, "current block X position is " + beforePos.x);				
+						break;
+					}
+				}
+				
+				*/
+				for (int i=0; i < tmp.length; i++){
+					if(tmp[i] != null) {
+						beforePos =tmp[i].getPosition();
+						offset = new PointF(
+							0,
+							mInitRightPos[i].y - tmp[i].getPosition().y
+						);
+						Lg.i(TAG, "current block i X position is " + i + "|"+ tmp[i].getPosition().x);
+						break;
+					}
+				}
+				
+				// create new blocks
+				tmp = new BlockItem[GameConfig.MAPHEIGHT];
+				if(poslist != null && poslist.size() > 0){
+					Iterator ite = poslist.iterator();
+					while(ite.hasNext()){
+						int pos = ((BlockCreatePattern.CreateInfo) ite.next()).mPos;
+						BlockItem b = (BlockItem)mBlockModel.createItem(
+							mInitRightPos[pos].x + GameConfig.WIDTH*2, 
+							mInitRightPos[pos].y);
+						tmp[pos] = b;
+					}
+					mBlockMap2.setRight(tmp);
+				}
+				break;
+		}
 	}
-	
-	@Override
-	public BlockItem getNextItem(int pattern, float y){
-		return (BlockItem)mBlockModel.createItem(pattern, y);
-	}
-	
+
 	private void addNewLines(){
 		Lg.i(TAG, "add new lines current");
 	
-		List<Integer> poslist = mCreatePattern.getNextCreatePosition();
+		List<BlockCreatePattern.CreateInfo> poslist = mCreatePattern.getNextCreatePosition(ScrollManager.Direct.RIGHT);
 		Lg.i(TAG,"new line size is " + poslist.size());
 		
 		// get current y position of block
@@ -135,12 +227,13 @@ implements BlockMap.Generater
 		}
 		
 		// create new blocks
-		tmp = new BlockItem[BlockMap2.MAPINITIALW];
+		tmp = new BlockItem[GameConfig.MAPINITIALW];
 		if(beforePos != null && poslist != null && poslist.size() > 0){
 			Iterator ite = poslist.iterator();
 			while(ite.hasNext()){
-				int pos = (Integer) ite.next();
-				BlockItem b = getNextItem(pos, beforePos.y+BatModel.WIDTH*2);
+				int pos = ((BlockCreatePattern.CreateInfo) ite.next()).mPos;
+				
+				BlockItem b = (BlockItem)mBlockModel.createItem(pos, beforePos.y+GameConfig.WIDTH*2);
 				tmp[pos] = b;
 			}
 			mBlockMap2.setTop(tmp);

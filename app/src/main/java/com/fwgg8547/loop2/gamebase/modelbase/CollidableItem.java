@@ -244,6 +244,7 @@ public class CollidableItem extends ItemBase implements ScrollableItem
 	
 	public void delete(ItemPattern delanim){
 		if(delanim != null){
+			Lg.i(TAG, "delete with animation");
 			setAnimationValid(false);
 			PointF pos = delanim.mInitPos;
 			if(pos!=null){
@@ -275,10 +276,12 @@ public class CollidableItem extends ItemBase implements ScrollableItem
 				}
 				*/
 				);
+			Lg.i(TAG, "setscaled");
 		} else {
 			mIsDeleted = true;
 		}
 		removeBody();
+		Lg.i(TAG, "removebody");
 	}
 	
 	/*
